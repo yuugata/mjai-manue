@@ -127,7 +127,7 @@ module Mjai
             
             # http://ja.wikipedia.org/wiki/%E7%AD%8B_(%E9%BA%BB%E9%9B%80)#.E9.96.93.E5.9B.9B.E9.96.93
             define_feature("aida4ken") do |pai|
-              if pai.type == "t"
+              if pai.type == "t" || pai.type == "m"
                 return false
               else
                 return ((2..5).include?(pai.number) &&
@@ -192,7 +192,7 @@ module Mjai
             # 5pの場合は「2pと8pのどちらかがi枚以下しか見えていない」であり、「2pと8pが合計でi枚以下しか見えていない」ではない。
             (0..3).each() do |i|
               define_feature("suji_visible<=#{i}") do |pai|
-                if pai.type == "t"
+                if pai.type == "t" || pai.type == "m"
                   return false
                 else
                   return get_suji_numbers(pai).any?(){ |n| !visible_n_or_more(Pai.new(pai.type, n), i + 1) }
@@ -229,7 +229,7 @@ module Mjai
             # 5pの場合は「2pと8pのどちらかをi枚以上持っている」であり、「2pと8pを合計i枚以上持っている」ではない。
             (1..4).each() do |i|
               define_feature("suji_in_tehais>=#{i}") do |pai|
-                if pai.type == "t"
+                if pai.type == "t" || pai.type == "m"
                   return false
                 else
                   return get_suji_numbers(pai).any?(){ |n| @tehai_set[Pai.new(pai.type, n)] >= i }
@@ -259,7 +259,7 @@ module Mjai
             
             (1..8).each() do |i|
               define_feature("same_type_in_prereach>=#{i}") do |pai|
-                if pai.type == "t"
+                if pai.type == "t" || pai.type == "m"
                   return false
                 else
                   num_same_type = (1..9).
@@ -295,7 +295,7 @@ module Mjai
             end
             
             def n_outer_prereach_sutehai(pai, n)
-              if pai.type == "t"
+              if pai.type == "t" || pai.type == "m"
                 return false
               elsif pai.number < 6 - n || pai.number > 4 + n
                 n_inner_pai = Pai.new(pai.type, pai.number < 5 ? pai.number + n : pai.number - n)
@@ -306,7 +306,7 @@ module Mjai
             end
             
             def n_or_more_of_neighbors_in_prereach_sutehais(pai, n, neighbor_distance)
-              if pai.type == "t"
+              if pai.type == "t" || pai.type == "m"
                 return false
               else
                 num_neighbors =
@@ -318,7 +318,7 @@ module Mjai
             end
             
             def suji_of(pai, target_pai_set)
-              if pai.type == "t"
+              if pai.type == "t" || pai.type == "m"
                 return false
               else
                 return get_suji_numbers(pai).all?(){ |n| target_pai_set.has_key?(Pai.new(pai.type, n)) }            
@@ -326,7 +326,7 @@ module Mjai
             end
             
             def weak_suji_of(pai, target_pai_set)
-              if pai.type == "t"
+              if pai.type == "t" || pai.type == "m"
                 return false
               else
                 return get_suji_numbers(pai).any?(){ |n| target_pai_set.has_key?(Pai.new(pai.type, n)) }
@@ -339,7 +339,7 @@ module Mjai
             
             # Uses the first pai to represent the suji. e.g. 1p for 14p suji
             def get_possible_sujis(pai)
-              if pai.type == "t"
+              if pai.type == "t" || pai.type == "m"
                 return []
               else
                 ns = [pai.number - 3, pai.number].select() do |n|
@@ -350,7 +350,7 @@ module Mjai
             end
             
             def n_chance_or_less(pai, n)
-              if pai.type == "t" || (4..6).include?(pai.number)
+              if pai.type == "t" || (4..6).include?(pai.number) || pai.type == "m"
                 return false
               else
                 return (1..2).any?() do |i|
@@ -361,7 +361,7 @@ module Mjai
             end
             
             def num_n_or_inner(pai, n)
-              return pai.type != "t" && pai.number >= n && pai.number <= 10 - n
+              return pai.type != "t" && pai.number >= n && pai.number <= 10 - n && pai.type != "m"
             end
             
             def visible_n_or_more(pai, n)
@@ -369,7 +369,7 @@ module Mjai
             end
             
             def urasuji_of(pai, target_pai_set)
-              if pai.type == "t"
+              if pai.type == "t" || pai.type == "m"
                 return false
               else
                 sujis = get_possible_sujis(pai)
@@ -378,7 +378,7 @@ module Mjai
             end
             
             def senkisuji_of(pai, target_pai_set)
-              if pai.type == "t"
+              if pai.type == "t" || pai.type == "m"
                 return false
               else
                 sujis = get_possible_sujis(pai)
@@ -387,7 +387,7 @@ module Mjai
             end
             
             def matagisuji_of(pai, target_pai_set)
-              if pai.type == "t"
+              if pai.type == "t" || pai.type == "m"
                 return false
               else
                 sujis = get_possible_sujis(pai)
@@ -396,7 +396,7 @@ module Mjai
             end
             
             def outer(pai, target_pai_set)
-              if pai.type == "t" || pai.number == 5
+              if pai.type == "t" || pai.number == 5 || pai.type == "m"
                 return false
               else
                 inner_numbers = pai.number < 5 ? ((pai.number + 1)..5) : (5..(pai.number - 1))

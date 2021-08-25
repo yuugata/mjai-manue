@@ -20,7 +20,7 @@ module Mjai
         # TODO Add ippatsu, uradora
         SUPPORTED_YAKUS = [:reach, :tanyaochu, :pinfu, :iso, :fanpai, :dora, :akadora]
         
-        DORA_YAKUS = [:dora, :akadora, :uradora]
+        DORA_YAKUS = [:dora, :akadora, :uradora, :nukidora]
         
         class ProbablisticFan
             

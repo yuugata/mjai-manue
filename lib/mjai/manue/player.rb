@@ -125,6 +125,7 @@ module Mjai
                 
                 current_shanten_analysis = ShantenAnalysis.new(self.tehais, nil, [:normal])
                 current_shanten = current_shanten_analysis.shanten
+                furo_actions = self.possible_furo_actions
                 if can_hora?(current_shanten_analysis)
                   return create_action({
                       :type => :hora,
@@ -133,6 +134,28 @@ module Mjai
                   })
                 elsif can_reach?(current_shanten_analysis)
                   return create_action({:type => :reach})
+                elsif !furo_actions.empty? &&
+                  !self.game.players.any?(){ |pl| pl != self && pl.reach_state != :none } &&
+                  action.type == :tsumo
+                  if nukidora = furo_actions.find {|action| action.type == :nukidora}
+                    current_scene = get_scene({
+                      :current_shanten_analysis => current_shanten_analysis,
+                      :sutehai_cands => [nil],
+                    })
+                    current_expected_points = current_scene.evals[nil].expected_points
+                    remains = self.tehais.dup()
+                    remains.delete_at(remains.index(nukidora.pai))
+                    shanten_analysis_with_furo = ShantenAnalysis.new(remains, nil, [:normal])
+                    shanten_with_furo = shanten_analysis_with_furo.shanten
+
+                    if shanten_with_furo <= current_shanten
+                      return create_action({
+                        :type => nukidora.type,
+                        :actor => nukidora.actor,
+                        :pai => nukidora.pai
+                      })
+                    end
+                  end
                 elsif self.reach?
                   return create_action({:type => :dahai, :pai => action.pai, :tsumogiri => true})
                 end
@@ -271,7 +294,7 @@ module Mjai
             :visible_set => visible_set,
             :context => self.context,
             :hora_prob_estimator => @hora_prob_estimator,
-            :num_remain_turns => self.game.num_pipais / 4,
+            :num_remain_turns => self.game.num_pipais / 3,
             :furos => self.furos,
             :score_type => @score_type,
             :player => self,
@@ -290,7 +313,7 @@ module Mjai
               invisibles.push(pai)
             end
           end
-          num_tsumos = game.num_pipais / 4
+          num_tsumos = game.num_pipais / 3
           hora_freq = 0
           num_tries = 1000
           num_tries.times() do
@@ -340,7 +363,8 @@ module Mjai
         end
         
         def random_test()
-          all_pais = (["m", "p", "s"].map(){ |t| (1..9).map(){ |n| Pai.new(t, n) } }.flatten() +
+          all_pais = (["p", "s"].map(){ |t| (1..9).map(){ |n| Pai.new(t, n) } }.flatten() +
+              [Pai.new("1m"), Pai.new("9m")] +
               (1..7).map(){ |n| Pai.new("t", n) }) * 4
           while true
             pais = all_pais.sample(13).sort()
@@ -362,7 +386,8 @@ module Mjai
         
         def initialize()
           pais = (0...4).map() do |i|
-            ["m", "p", "s"].map(){ |t| (1..9).map(){ |n| Pai.new(t, n, n == 5 && i == 0) } } +
+            ["p", "s"].map(){ |t| (1..9).map(){ |n| Pai.new(t, n, n == 5 && i == 0) } } +
+                [Pai.new("1m"), Pai.new("9m")] +
                 (1..7).map(){ |n| Pai.new("t", n) }
           end
           @all_pais = pais.flatten().sort()

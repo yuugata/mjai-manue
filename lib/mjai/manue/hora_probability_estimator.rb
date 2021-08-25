@@ -21,7 +21,7 @@ module Mjai
             def initialize(estimator, params)
               @estimator = estimator
               @visible_set = params[:visible_set]
-              @num_invisible = 4 * (9 * 3 + 7) - @visible_set.values.inject(0, :+)
+              @num_invisible = 4 * (9 * 2 + 2 + 7) - @visible_set.values.inject(0, :+)
               @num_remain_turns = params[:num_remain_turns]
               @current_shanten = params[:current_shanten]
             end
@@ -176,7 +176,7 @@ module Mjai
                     end
                     for rnums in rnums_cands
                       in_range = rnums.all?() do |rn|
-                        (rn == 0 || pais[0].type != "t") && (1..9).include?(pais[0].number + rn)
+                        (rn == 0 || pais[0].type != "t" || pais[0].type != "m") && (1..9).include?(pais[0].number + rn)
                       end
                       if in_range
                         result.add(rnums.map(){ |rn| Pai.new(pais[0].type, pais[0].number + rn) })
@@ -216,7 +216,7 @@ module Mjai
                       action.actor.tehais.size,
                       false)
                   criterion = Criterion.new(
-                      archive.num_pipais / 4.0,
+                      archive.num_pipais / 3.0,
                       ShantenAnalysis.new(action.actor.tehais).shanten)
                   p [:criterion, criterion]
                   criteria_map[action.actor] ||= []
@@ -224,7 +224,7 @@ module Mjai
                 when :hora
                   winners.push(action.actor)
                 when :end_kyoku
-                  num_remain_turns = archive.num_pipais / 4.0
+                  num_remain_turns = archive.num_pipais / 3.0
                   for player, criteria in criteria_map
                     for criterion in criteria
                       if winners.include?(player)
